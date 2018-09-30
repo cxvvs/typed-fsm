@@ -1,0 +1,16 @@
+{
+  "name": "typed-fsm",
+  "description": "A small well-typed finite state machine library for TypeScript",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && jest"
+  },
+  "devDependencies": {
+    "@types/jest": "23.3.2",
+    "jest": "23.6.0",
+    "ts-jest": "23.10.2",
+    "typescript": "3.1.1"
+  }
+}
