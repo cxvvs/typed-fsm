@@ -79,10 +79,15 @@ export namespace FSMMessage {
 }
 
 /**
- * A dispatcher is an object that is always attached to a specific FSM instance
- * and allows to send messages to said instance.
+ * Self is an object that is always attached to a specific FSM instance and allows :
+ *  - sending messages to said instance
+ *  - retrieving the current state of that instance (e.g after a promise completion)
  */
-export type Dispatcher<MM extends MessageMap> = {
+export type Self<
+  SM extends StateMap<any>,
+  MM extends MessageMap
+> = {
+  state: () => SM[keyof SM]['T']
   send: {
     [K in keyof MM]: (message: MM[K]['_T']) => void
   }
@@ -93,9 +98,8 @@ type Lifecycle<
   STATE extends keyof SM,
   MM extends MessageMap
 > = (
-  self: Dispatcher<MM>,
-  entryState: SM[STATE]['T'],
-  stateGet: () => SM[keyof SM]['T']
+  self: Self<SM, MM>,
+  entryState: SM[STATE]['T']
 ) => Hooks<SM[STATE]['T']>
 
 type StateMap<STATE> =
@@ -121,14 +125,14 @@ type BehaviorMap<
       lifecycle?: Lifecycle<SM, S, MM>
       transitions: {
         [M in keyof MM]?: (
-          self: Dispatcher<MM>,
+          self: Self<SM, MM>,
           currentState: (SM[S]['T']),
           message: MM[M]['_T']
         ) => SM[keyof SM]['T']
       } & {
         // Wildcard : matches when nothing else did regardless of the order of declaration
         '_'?: (
-          self: Dispatcher<MM>,
+          self: Self<SM, MM>,
           currentState: SM[S]['T'],
           message: MM[keyof MM]['_T']
         ) => SM[keyof SM]['T']
@@ -223,7 +227,7 @@ class FSMDescription<
   MM extends MessageMap
 > {
 
-  readonly create: (initial: INITIAL) => FSMInstance<SM[keyof SM]['T'], MM>;
+  readonly create: (initial: INITIAL) => FSMInstance<SM[keyof SM]['T'], SM, MM>;
 
   readonly observable: <OBSERVABLERESULT> (
     hook: ObservableHook<STATES, OBSERVABLERESULT>
@@ -265,8 +269,8 @@ class FSMDescription<
 
     const dispatch =
         (stateSet: (state: STATES) => void, stateGet: () => STATES) =>
-        (hookSet: (hooks: Hooks<STATES> | undefined) => void, hookGet: () => Hooks<STATES> | undefined): Dispatcher<MM> => {
-          const self: Dispatcher<MM> = {} as Dispatcher<MM>;
+        (hookSet: (hooks: Hooks<STATES> | undefined) => void, hookGet: () => Hooks<STATES> | undefined): Self<SM, MM> => {
+          const self: Self<SM, MM> = {} as Self<SM, MM>;
 
           const sendFactory = <T>(message: FSMMessage<T>) => (messagePayload: T) => {
             const state = stateGet();
@@ -324,7 +328,7 @@ class FSMDescription<
               }
               // Lifecycle : On enter new state
               if (newStateBehavior.lifecycle !== undefined) {
-                const newHook = newStateBehavior.lifecycle(self, newState, stateGet)
+                const newHook = newStateBehavior.lifecycle(self, newState)
                 hookSet(newHook)
               }
               // No lifecycle for the new state : reset the hooks
@@ -340,15 +344,16 @@ class FSMDescription<
             send[messageKey] = sendFactory(messagePrototype);
           }
 
+          self.state = stateGet
           self.send = send
 
           return self;
         }
 
-    this.create = (initial: INITIAL): FSMInstance<SM[keyof SM]['T'], MM[keyof MM]['_T']> => {
+    this.create = (initial: INITIAL): FSMInstance<SM[keyof SM]['T'], SM, MM> => {
       const initialValue = this.factory(initial);
 
-      return new FSMInstance<SM[keyof SM]['T'], MM>(
+      return new FSMInstance<SM[keyof SM]['T'], SM, MM>(
         initialValue,
         dispatch,
         findStateBehavior
@@ -366,10 +371,10 @@ class FSMDescription<
 
 }
 
-class FSMInstance<STATE, MM extends MessageMap> {
+class FSMInstance<STATE, SM extends StateMap<STATE>, MM extends MessageMap> {
 
   readonly value: () => STATE;
-  readonly send: Dispatcher<MM>['send']
+  readonly send: Self<SM, MM>['send']
 
   private _value: STATE;
   private _hooks?: Hooks<STATE>;
@@ -379,13 +384,13 @@ class FSMInstance<STATE, MM extends MessageMap> {
     private dispatch:
       (stateSet: (state: STATE) => void, stateGet: () => STATE) =>
       (hookSet: (hooks: Hooks<STATE> | undefined) => void, hookGet: () => Hooks<STATE> | undefined) =>
-      Dispatcher<MM>,
+      Self<SM, MM>,
     private findStateBehavior: (state: STATE) => any
   ) {
     this._value = initialValue;
     this.value = () => this._value;
 
-    const dispatcher: Dispatcher<MM> = dispatch
+    const dispatcher: Self<SM, MM> = dispatch
       ((newState) => this._value = newState, this.value)
       ((hooks) => this._hooks = hooks, () => this._hooks);
 
@@ -433,7 +438,7 @@ class FSMDescriptionWithObservable<
   OBSERVABLE
 > {
 
-  readonly create: (initial: INITIAL) => ObservableFSMInstance<SM[keyof SM]['T'], MM, OBSERVABLE>;
+  readonly create: (initial: INITIAL) => ObservableFSMInstance<SM[keyof SM]['T'], SM, MM, OBSERVABLE>;
 
   constructor(
     private states: SM,
@@ -443,11 +448,11 @@ class FSMDescriptionWithObservable<
     private _dispatch:
       (stateSet: (state: STATE) => void, stateGet: () => STATE) =>
       (hookSet: (hooks: Hooks<STATE> | undefined) => void, hookGet: () => Hooks<STATE> | undefined) =>
-      Dispatcher<MM>,
+      Self<SM, MM>,
     private observableHook: ObservableHook<STATE, OBSERVABLE>,
     private findStateBehavior: (state: STATE) => any
   ) {
-    this.create = (initial: INITIAL): ObservableFSMInstance<SM[keyof SM]['T'], MM[keyof MM]['_T'], OBSERVABLE> => {
+    this.create = (initial: INITIAL): ObservableFSMInstance<SM[keyof SM]['T'], SM, MM, OBSERVABLE> => {
 
       const observer: InternalObserver<STATE> = new InternalObserver()
       const hookResult: OBSERVABLE = observableHook(observer)
@@ -464,7 +469,7 @@ class FSMDescriptionWithObservable<
         return _dispatch(newStateSet, stateGet)
       }
 
-      return new ObservableFSMInstance<SM[keyof SM]['T'], MM, OBSERVABLE>(
+      return new ObservableFSMInstance<SM[keyof SM]['T'], SM, MM, OBSERVABLE>(
         initialValue,
         dispatch,
         hookResult,
@@ -476,8 +481,8 @@ class FSMDescriptionWithObservable<
 }
 
 
-class ObservableFSMInstance<STATE, MM extends MessageMap, OBSERVABLE>
-  extends FSMInstance<STATE, MM> {
+class ObservableFSMInstance<STATE, SM extends StateMap<STATE>, MM extends MessageMap, OBSERVABLE>
+  extends FSMInstance<STATE, SM, MM> {
 
   readonly asObservable: OBSERVABLE
 
@@ -486,7 +491,7 @@ class ObservableFSMInstance<STATE, MM extends MessageMap, OBSERVABLE>
     private _dispatch:
       (stateSet: (state: STATE) => void, stateGet: () => STATE) =>
       (hookSet: (hooks: Hooks<STATE> | undefined) => void, hookGet: () => Hooks<STATE> | undefined) =>
-      Dispatcher<MM>,
+      Self<SM, MM>,
     private _observable: OBSERVABLE,
     private _findStateBehavior: (state: STATE) => any
   ) {
