@@ -46,7 +46,6 @@ type FSMMessage<T> = {
 
 type _InternalMessage<T> = FSMMessage<T> & {
   _id: MessageId
-  _name?: string
 }
 
 type MessageId = number;
@@ -67,14 +66,13 @@ export namespace FSMMessage {
    *
    * @param _name Optional string identifier for the message. Used for debug purposes only.
    */
-  export function create<T>(_name?: string): FSMMessage<T> {
+  export function create<T>(): FSMMessage<T> {
     const _id = messageId++;
 
     const message: (t: T) => _InternalMessageInstance<T> =
       (value: T) => ({ _id, value });
 
     (message as any)._id = _id;
-    (message as any)._name = _name;
 
     return message as any as FSMMessage<T>;
   }
