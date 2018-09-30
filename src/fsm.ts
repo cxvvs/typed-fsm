@@ -78,11 +78,25 @@ export namespace FSMMessage {
   }
 }
 
-type Dispatcher<MM extends MessageMap> = {
+/**
+ * A dispatcher is an object that is always attached to a specific FSM instance
+ * and allows to send messages to said instance.
+ */
+export type Dispatcher<MM extends MessageMap> = {
   send: {
     [K in keyof MM]: (message: MM[K]['_T']) => void
   }
 }
+
+type Lifecycle<
+  SM extends StateMap<any>,
+  STATE extends keyof SM,
+  MM extends MessageMap
+> = (
+  self: Dispatcher<MM>,
+  entryState: SM[STATE]['T'],
+  stateGet: () => SM[keyof SM]['T']
+) => Hooks<SM[STATE]['T']>
 
 type StateMap<STATE> =
   // Last type is always guaranteed to be a sub-type of `STATE` by construction
@@ -104,11 +118,7 @@ type BehaviorMap<
   MM extends MessageMap
   > = {
     [S in keyof SM]: {
-      lifecycle?: (
-        self: Dispatcher<MM>,
-        entryState: SM[S]['T'],
-        stateGet: () => SM[keyof SM]['T']
-      ) => Hooks<SM[S]['T']>
+      lifecycle?: Lifecycle<SM, S, MM>
       transitions: {
         [M in keyof MM]?: (
           self: Dispatcher<MM>,
