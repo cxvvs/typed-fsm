@@ -117,26 +117,37 @@ type Hooks<CURRENTSTATE> = {
   onExit?: (state: CURRENTSTATE) => void
 }
 
+type Transitions<
+  SM extends StateMap<any>,
+  CURRENTSTATE extends keyof SM,
+  MM extends MessageMap
+> = {
+  [M in keyof MM]?: (
+    self: Self<SM, MM>,
+    currentState: (SM[CURRENTSTATE]['T']),
+    message: MM[M]['_T']
+  ) => SM[keyof SM]['T']
+}
+
+type WildcardTransition<
+  SM extends StateMap<any>,
+  CURRENTSTATE extends keyof SM,
+  MM extends MessageMap
+> = {
+  '_'?: (
+    self: Self<SM, MM>,
+    currentState: (SM[CURRENTSTATE]['T']),
+    message: MM[keyof MM]['_T']
+  ) => SM[keyof SM]['T']
+}
+
 type BehaviorMap<
   SM extends StateMap<any>,
   MM extends MessageMap
   > = {
     [S in keyof SM]: {
       lifecycle?: Lifecycle<SM, S, MM>
-      transitions: {
-        [M in keyof MM]?: (
-          self: Self<SM, MM>,
-          currentState: (SM[S]['T']),
-          message: MM[M]['_T']
-        ) => SM[keyof SM]['T']
-      } & {
-        // Wildcard : matches when nothing else did regardless of the order of declaration
-        '_'?: (
-          self: Self<SM, MM>,
-          currentState: SM[S]['T'],
-          message: MM[keyof MM]['_T']
-        ) => SM[keyof SM]['T']
-      }
+      transitions: Transitions<SM, S, MM> & WildcardTransition<SM, S, MM>
     }
   }
 
