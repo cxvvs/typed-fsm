@@ -62,9 +62,10 @@ let messageId = 1;
 
 export namespace FSMMessage {
   /**
-   * Create a prototype for all messages of a same type `T`
+   * Creates a uniquely identified message description for all messages of type `T` in a state machine
    *
-   * @param _name Optional string identifier for the message. Used for debug purposes only.
+   * @param T Type for the message content. Does not need any specific constraint or discriminator field.
+   * @returns A message identifier
    */
   export function create<T>(): FSMMessage<T> {
     const _id = messageId++;
@@ -93,6 +94,14 @@ export type Self<
   }
 }
 
+/**
+ * A lifecycle is a function executed for every transition
+ * (ALLSTATES ∪ {}) - STATE -> STATE
+ *
+ * It must return a function that optionally defines :
+ *  - onUpdate : a function executed for the transitions STATE -> STATE
+ *  - onExit : a function executed for the transitions STATE -> ALLSTATES - STATE
+ */
 type Lifecycle<
   SM extends StateMap<any>,
   STATE extends keyof SM,
