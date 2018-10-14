@@ -537,3 +537,48 @@ test('State getter asynchronously', () => {
   jest.advanceTimersByTime(4000)
   expect(instance.value()).toEqual(Playing(0))
 })
+
+test('Message sent during lifecycle enter should be processed at the end of lifecycle method', () => {
+  const hook = {
+    idleEnter: jest.fn(),
+    idleEnterCompleted: jest.fn(),
+    playingEnter: jest.fn()
+  }
+
+  const videoPlayerDescription = videoPlayerSkeleton
+    .behaviors({
+      idle: {
+        lifecycle: (self, enterState) => {
+          hook.idleEnter();
+          expect(hook.idleEnter).toHaveBeenCalledTimes(1);
+          expect(hook.idleEnterCompleted).toHaveBeenCalledTimes(0);
+          expect(hook.playingEnter).toHaveBeenCalledTimes(0);
+
+          self.send.play({})
+
+          hook.idleEnterCompleted();
+          expect(hook.idleEnter).toHaveBeenCalledTimes(1);
+          expect(hook.idleEnterCompleted).toHaveBeenCalledTimes(1);
+          expect(hook.playingEnter).toHaveBeenCalledTimes(0);
+          return {}
+        },
+        transitions: {
+          play: () => Playing(0)
+        }
+      },
+      paused: {
+        lifecycle:  () => {
+          hook.playingEnter();
+          expect(hook.idleEnter).toHaveBeenCalledTimes(1);
+          expect(hook.idleEnterCompleted).toHaveBeenCalledTimes(1);
+          expect(hook.playingEnter).toHaveBeenCalledTimes(1);
+          return {};
+        },
+        transitions: {}
+      },
+      playing: { transitions: {} }
+    })
+
+  const instance = videoPlayerDescription.create({});
+  expect(instance.value()).toEqual(Playing(0))
+})
