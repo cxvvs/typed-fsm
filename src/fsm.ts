@@ -100,7 +100,7 @@ type Lifecycle<
 > = (
   self: Self<SM, MM>,
   entryState: SM[STATE]['T']
-) => Hooks<SM[STATE]['T']>
+) => Hooks<SM[STATE]['T']> | void
 
 type StateMap<STATE> =
   // Last type is always guaranteed to be a sub-type of `STATE` by construction
@@ -340,7 +340,7 @@ class FSMDescription<
               // Lifecycle : On enter new state
               if (newStateBehavior.lifecycle !== undefined) {
                 const newHook = newStateBehavior.lifecycle(self, newState)
-                hookSet(newHook)
+                hookSet(newHook || {})
               }
               // No lifecycle for the new state : reset the hooks
               else {

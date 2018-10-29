@@ -145,6 +145,32 @@ test('First state lifecycle', () => {
   expect(hook.exit).toHaveBeenCalledTimes(1);
 })
 
+test('Support void lifecycle', () => {
+  const hook = {
+    enter: jest.fn(),
+  }
+
+  const videoPlayerDescription = videoPlayerSkeleton
+    .behaviors({
+      idle: {
+        lifecycle: (self) => {
+          hook.enter();
+        },
+        transitions: {
+          pause: () => Idle,
+          play: () => Playing(0)
+        }
+      },
+      paused: { transitions: {} },
+      playing: { transitions: {} }
+    })
+
+  expect(hook.enter).toHaveBeenCalledTimes(0);
+
+  const instance = videoPlayerDescription.create({});
+  expect(hook.enter).toHaveBeenCalledTimes(1);
+})
+
 test('Second state lifecycle', () => {
   const hook = {
     enter: jest.fn(),
