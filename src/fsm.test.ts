@@ -111,7 +111,7 @@ test('First state lifecycle', () => {
   const videoPlayerDescription = videoPlayerSkeleton
     .behaviors({
       idle: {
-        lifecycle: (self) => {
+        onEnter: (self) => {
           hook.enter();
           return {
             onUpdate: hook.update,
@@ -153,7 +153,7 @@ test('Support void lifecycle', () => {
   const videoPlayerDescription = videoPlayerSkeleton
     .behaviors({
       idle: {
-        lifecycle: (self) => {
+        onEnter: (self) => {
           hook.enter();
         },
         handling: {
@@ -187,7 +187,7 @@ test('Second state lifecycle', () => {
       },
       paused: { handling: {} },
       playing: {
-        lifecycle: (self) => {
+        onEnter: (self) => {
           hook.enter();
           return {
             onUpdate: hook.update,
@@ -247,7 +247,7 @@ test('Same lifecycle repetition', () => {
       },
       paused: { handling: {} },
       playing: {
-        lifecycle: (self) => {
+        onEnter: (self) => {
           hook.enter();
           return {
             onUpdate: hook.update,
@@ -312,7 +312,7 @@ test('Enter lifecycle hook should not be retriggered', () => {
   const videoPlayerDescription = videoPlayerSkeleton
     .behaviors({
       idle: {
-        lifecycle: () => {
+        onEnter: () => {
           hook.enter();
           return {};
         },
@@ -346,7 +346,7 @@ test('Asynchronous message leading to state change', () => {
   const autoPlayerDescription = videoPlayerSkeleton
     .behaviors({
       idle: {
-        lifecycle: (self) => {
+        onEnter: (self) => {
           setTimeout(() => self.send.play({}), waitTime)
           return {}
         },
@@ -382,7 +382,7 @@ test('Infinite asynchronous messages', () => {
         handling: {}
       },
       playing: {
-        lifecycle: (self, state) => {
+        onEnter: (self, state) => {
           let time = state.currentTime;
 
           const handle = setInterval(() => {
@@ -431,7 +431,7 @@ test('Wildcard transition', () => {
   const videoPlayerDescription = videoPlayerSkeleton
     .behaviors({
       idle: {
-        lifecycle: () => {
+        onEnter: () => {
           return {
             onUpdate: idleUpdate
           }
@@ -528,7 +528,7 @@ test('State getter asynchronously', () => {
   const videoPlayerDescription = videoPlayerSkeleton
     .behaviors({
       idle: {
-        lifecycle: (self, enterState) => {
+        onEnter: (self, enterState) => {
           expect(enterState).toEqual(Idle)
           expect(self.state()).toEqual(Idle)
 
@@ -574,7 +574,7 @@ test('Message sent during lifecycle enter should be processed at the end of life
   const videoPlayerDescription = videoPlayerSkeleton
     .behaviors({
       idle: {
-        lifecycle: (self, enterState) => {
+        onEnter: (self, enterState) => {
           hook.idleEnter();
           expect(hook.idleEnter).toHaveBeenCalledTimes(1);
           expect(hook.idleEnterCompleted).toHaveBeenCalledTimes(0);
@@ -593,7 +593,7 @@ test('Message sent during lifecycle enter should be processed at the end of life
         }
       },
       paused: {
-        lifecycle:  () => {
+        onEnter:  () => {
           hook.playingEnter();
           expect(hook.idleEnter).toHaveBeenCalledTimes(1);
           expect(hook.idleEnterCompleted).toHaveBeenCalledTimes(1);

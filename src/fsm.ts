@@ -146,7 +146,7 @@ type BehaviorMap<
   MM extends MessageMap
   > = {
     [S in keyof SM]: {
-      lifecycle?: Lifecycle<SM, S, MM>
+      onEnter?: Lifecycle<SM, S, MM>
       handling: MessageHandlers<SM, S, MM> & WildcardHandler<SM, S, MM>
     }
   }
@@ -338,8 +338,8 @@ class FSMDescription<
                 currentHooks.onExit(state)
               }
               // Lifecycle : On enter new state
-              if (newStateBehavior.lifecycle !== undefined) {
-                const newHook = newStateBehavior.lifecycle(self, newState)
+              if (newStateBehavior.onEnter !== undefined) {
+                const newHook = newStateBehavior.onEnter(self, newState)
                 hookSet(newHook || {})
               }
               // No lifecycle for the new state : reset the hooks
@@ -409,9 +409,9 @@ class FSMInstance<STATE, SM extends StateMap<STATE>, MM extends MessageMap> {
 
     // Lifecycle for the initial state state
     const initialBehavior = findStateBehavior(this._value);
-    if (initialBehavior !== undefined && initialBehavior.lifecycle !== undefined) {
-      // call enter()
-      const hooks: Hooks<STATE> = initialBehavior.lifecycle(dispatcher, this._value, this.value);
+    if (initialBehavior !== undefined && initialBehavior.onEnter !== undefined) {
+      // call onEnter()
+      const hooks: Hooks<STATE> = initialBehavior.onEnter(dispatcher, this._value, this.value);
       // Update hooks
       this._hooks = hooks;
     }
