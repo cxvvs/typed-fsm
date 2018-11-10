@@ -88,9 +88,9 @@ test('Empty state machine', () => {
 
   const videoPlayerDescription = videoPlayerSkeleton
     .behaviors({
-      idle: { transitions: {} },
-      paused: { transitions: {} },
-      playing: { transitions: {} }
+      idle: { handling: {} },
+      paused: { handling: {} },
+      playing: { handling: {} }
     })
 
   const instance = videoPlayerDescription.create({});
@@ -118,13 +118,13 @@ test('First state lifecycle', () => {
             onExit: hook.exit
           }
         },
-        transitions: {
+        handling: {
           pause: () => Idle,
           play: () => Playing(0)
         }
       },
-      paused: { transitions: {} },
-      playing: { transitions: {} }
+      paused: { handling: {} },
+      playing: { handling: {} }
     })
 
   expect(hook.enter).toHaveBeenCalledTimes(0);
@@ -156,13 +156,13 @@ test('Support void lifecycle', () => {
         lifecycle: (self) => {
           hook.enter();
         },
-        transitions: {
+        handling: {
           pause: () => Idle,
           play: () => Playing(0)
         }
       },
-      paused: { transitions: {} },
-      playing: { transitions: {} }
+      paused: { handling: {} },
+      playing: { handling: {} }
     })
 
   expect(hook.enter).toHaveBeenCalledTimes(0);
@@ -181,11 +181,11 @@ test('Second state lifecycle', () => {
   const videoPlayerDescription = videoPlayerSkeleton
     .behaviors({
       idle: {
-        transitions: {
+        handling: {
           play: () => Playing(0)
         }
       },
-      paused: { transitions: {} },
+      paused: { handling: {} },
       playing: {
         lifecycle: (self) => {
           hook.enter();
@@ -194,7 +194,7 @@ test('Second state lifecycle', () => {
             onExit: hook.exit
           }
         },
-        transitions: {
+        handling: {
           play: () => Playing(0),
           pause: () => Paused(0)
         }
@@ -241,11 +241,11 @@ test('Same lifecycle repetition', () => {
   const videoPlayerDescription = videoPlayerSkeleton
     .behaviors({
       idle: {
-        transitions: {
+        handling: {
           play: () => Playing(0)
         }
       },
-      paused: { transitions: {} },
+      paused: { handling: {} },
       playing: {
         lifecycle: (self) => {
           hook.enter();
@@ -254,7 +254,7 @@ test('Same lifecycle repetition', () => {
             onExit: hook.exit
           }
         },
-        transitions: {
+        handling: {
           play: () => Playing(0),
           stop: () => Idle
         }
@@ -316,12 +316,12 @@ test('Enter lifecycle hook should not be retriggered', () => {
           hook.enter();
           return {};
         },
-        transitions: {
+        handling: {
           stop: () => Idle
         }
       },
-      paused: { transitions: {} },
-      playing: { transitions: {} }
+      paused: { handling: {} },
+      playing: { handling: {} }
     })
 
   const instance = videoPlayerDescription.create({});
@@ -350,13 +350,13 @@ test('Asynchronous message leading to state change', () => {
           setTimeout(() => self.send.play({}), waitTime)
           return {}
         },
-        transitions: {
+        handling: {
           pause: () => Idle,
           play: (self) => Playing(0)
         }
       },
-      paused: { transitions: {} },
-      playing: { transitions: {} }
+      paused: { handling: {} },
+      playing: { handling: {} }
     })
 
   const instance = autoPlayerDescription.create({})
@@ -373,13 +373,13 @@ test('Infinite asynchronous messages', () => {
   const videoPlayerDescription = videoPlayerSkeleton
     .behaviors({
       idle: {
-        transitions: {
+        handling: {
           pause: () => Idle,
           play: () => Playing(0)
         }
       },
       paused: {
-        transitions: {}
+        handling: {}
       },
       playing: {
         lifecycle: (self, state) => {
@@ -393,7 +393,7 @@ test('Infinite asynchronous messages', () => {
             onExit: () => { clearInterval(handle) }
           }
         },
-        transitions: {
+        handling: {
           seek: (_, _state, message) => Playing(message.time),
           pause: (_, state) => Paused(state.currentTime),
           stop: () => Idle
@@ -436,7 +436,7 @@ test('Wildcard transition', () => {
             onUpdate: idleUpdate
           }
         },
-        transitions: {
+        handling: {
           stop: () => Idle,
           _: () => {
             wildcard();
@@ -444,8 +444,8 @@ test('Wildcard transition', () => {
           }
         }
       },
-      paused: { transitions: {} },
-      playing: { transitions: {} }
+      paused: { handling: {} },
+      playing: { handling: {} }
     })
 
   const instance = videoPlayerDescription.create({});
@@ -489,13 +489,13 @@ test('State as observable', () => {
   const videoPlayerDescription = videoPlayerSkeleton
     .behaviors({
       idle: {
-        transitions: {
+        handling: {
           play: () => Playing(0),
         }
       },
-      paused: { transitions: {} },
+      paused: { handling: {} },
       playing: {
-        transitions: {
+        handling: {
           stop: () => Idle
         }
       }
@@ -546,12 +546,12 @@ test('State getter asynchronously', () => {
           // Timeout not cleaned up on purpose
           return {}
         },
-        transitions: {
+        handling: {
           play: () => Playing(0)
         }
       },
-      paused: { transitions: {} },
-      playing: { transitions: {} }
+      paused: { handling: {} },
+      playing: { handling: {} }
     })
 
   const instance = videoPlayerDescription.create({});
@@ -588,7 +588,7 @@ test('Message sent during lifecycle enter should be processed at the end of life
           expect(hook.playingEnter).toHaveBeenCalledTimes(0);
           return {}
         },
-        transitions: {
+        handling: {
           play: () => Playing(0)
         }
       },
@@ -600,9 +600,9 @@ test('Message sent during lifecycle enter should be processed at the end of life
           expect(hook.playingEnter).toHaveBeenCalledTimes(1);
           return {};
         },
-        transitions: {}
+        handling: {}
       },
-      playing: { transitions: {} }
+      playing: { handling: {} }
     })
 
   const instance = videoPlayerDescription.create({});

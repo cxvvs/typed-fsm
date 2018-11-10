@@ -117,7 +117,7 @@ type Hooks<CURRENTSTATE> = {
   onExit?: (state: CURRENTSTATE) => void
 }
 
-type Transitions<
+type MessageHandlers<
   SM extends StateMap<any>,
   CURRENTSTATE extends keyof SM,
   MM extends MessageMap
@@ -129,7 +129,7 @@ type Transitions<
   ) => SM[keyof SM]['T']
 }
 
-type WildcardTransition<
+type WildcardHandler<
   SM extends StateMap<any>,
   CURRENTSTATE extends keyof SM,
   MM extends MessageMap
@@ -147,7 +147,7 @@ type BehaviorMap<
   > = {
     [S in keyof SM]: {
       lifecycle?: Lifecycle<SM, S, MM>
-      transitions: Transitions<SM, S, MM> & WildcardTransition<SM, S, MM>
+      handling: MessageHandlers<SM, S, MM> & WildcardHandler<SM, S, MM>
     }
   }
 
@@ -303,8 +303,8 @@ class FSMDescription<
             }
 
             const messageTransition =
-              stateBehavior.transitions[messageKey] ||
-              stateBehavior.transitions['_']
+              stateBehavior.handling[messageKey] ||
+              stateBehavior.handling['_']
 
             if (messageTransition === undefined) {
               console.warn(FSMCommon.noTransition(stateKey, messageKey))
