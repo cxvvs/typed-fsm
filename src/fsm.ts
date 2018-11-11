@@ -8,27 +8,18 @@ type FSMState<PARENT, STATE extends PARENT> = {
   T: STATE;
 }
 
-export type FSMStateFactory<PARENT> = {
-  create: <STATE extends PARENT>
-    (is: (state: PARENT) => state is STATE) => FSMState<PARENT, STATE>
-}
-
 /**
  * Creates a state factory where all states must be subtypes of a specific type
  *
  * @param PARENT The upper-bound type for all the possible state
  * @returns A state factory
  */
-export function FSMState<PARENT>(): FSMStateFactory<PARENT> {
+export function FSMState<PARENT, STATE extends PARENT>(
+  is: (state: PARENT) => state is STATE
+): FSMState<PARENT, STATE> {
   return {
-    create: <STATE extends PARENT>(
-      is: (state: PARENT) => state is STATE
-    ): FSMState<PARENT, STATE> => {
-      return {
-        is,
-        T: (undefined as any as STATE)
-      }
-    }
+    is,
+    T: (undefined as any as STATE)
   }
 }
 

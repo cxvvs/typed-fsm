@@ -59,7 +59,7 @@ npm install --save-exact typed-fsm
 
 ### Factories
 
-- [`FSMState`](#fsmstatefactory)
+- [`FSMState`](#fsmstate)
 - [`FSMMessage`](#fsmmessage)
 - [`FSM`](#fsm)
 
@@ -81,7 +81,7 @@ You can think of a FSM as a union of classes where every method call has the abi
 
 When compared to a regular class, Typed FSM provides you with :
 - Sum type state : Expressing the fact that your object goes through different
-states is easy, and the type discrimination boilerplate is Only paid once (see [FSM State creation](#fsmstatefactory))
+states is easy, and the type discrimination boilerplate is Only paid once (see [FSM State creation](#fsmstate))
 - Immutable state : A state change is just a new object returned at the end of a message handler, like Redux.
 - Scoped message handling : Defining a message handler is just like defining a method in a class, except that you also specify the particular state for which that method applies to. Messages not handled are simply ignored by default.
 
@@ -91,13 +91,13 @@ states is easy, and the type discrimination boilerplate is Only paid once (see [
 A finite state machine contains internal state that changes in reaction to the receipt of messages.  
 Different states of that machine are described with their own respective type.  
 States can be plain objects that may or may not contain common data, but there must always be a way to tell them appart from one another with a type guard.  
-For state creation, see [FSMState factory](#fsmstatefactory).
+For state creation, see [FSMState](#fsmstate).
 
 #### Messages
 
 Messages are signals sent to the state machine. Those signals may, but do not have to, contain data.  
 Different states are allowed to handle the same kind of messages (but at runtime, a received message is only processed once by the current state of the FSM).  
-For message creation, see [FSMMessage factory](#fsmmessage).  
+For message creation, see [FSMMessage](#fsmmessage).  
 For sending a message to a FSM, see [Self.send](#self).
 
 #### Behaviors
@@ -112,16 +112,7 @@ See the [Behavior API](#behavior)
 
 ### Factories
 
-#### <a name="fsmstate"></a> `FSMState<State>()`
-
-Creates a state factory where all states must be subtypes of `State`.  
-Actual FSM states are then instanciated from said factory with the method `create`.
-
-*Returns: FSMStateFactory*
-
-- - -
-
-#### <a name="fsmstatefactory"></a> `[FSMStateFactory].create<S>(is: State is S)`
+#### <a name="fsmstate"></a> `FSMState<State>()` `FSMState<ParentState, State>(is: ParentState is State)`
 
 *Arguments:*
 
@@ -144,12 +135,10 @@ function isGreen(s: StopLight): s is Green { return s.type === 'green' }
 function isOrange(s: StopLight): s is Orange { return s.type === 'orange' }
 function isRed(s: StopLight): s is Red { return s.type === 'red' }
 
-const factory = FSMState<StopLight>()
-
 export const states = {
-  green: factory.create(isGreen),
-  orange: factory.create(isOrange),
-  red: factory.create(isRed),
+  green: FSMState(isGreen),
+  orange: FSMState(isOrange),
+  red: FSMState(isRed),
 }
 ```
 

@@ -47,11 +47,9 @@ namespace VideoPlayerState {
 }
 
 // FSM States
-const state = FSMState<VideoPlayerState>();
-
-const idle = state.create(VideoPlayerState.isIdle);
-const paused = state.create(VideoPlayerState.isPaused);
-const playing = state.create(VideoPlayerState.isPlaying);
+const idle = FSMState(VideoPlayerState.isIdle);
+const paused = FSMState(VideoPlayerState.isPaused);
+const playing = FSMState(VideoPlayerState.isPlaying);
 
 /////////////////////////////
 // Messages
