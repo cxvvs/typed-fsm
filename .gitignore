@@ -3,4 +3,7 @@ src/*.js
 *.map
 bin/
 
+lib/
+.rpt2_cache/
+
 yarn-error.log

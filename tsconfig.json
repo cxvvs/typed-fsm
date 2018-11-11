@@ -1,15 +1,17 @@
 {
   "compilerOptions": {
+    "declaration": true,
     "target": "es5",
     "lib": [ "es6", "dom" ],
     "strict": true,
     "removeComments": true,
     "preserveConstEnums": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "outDir": "./lib",
+    "declarationDir": "./lib"
   },
   "filesGlob": [
-    "src/fsm.ts",
-    "src/*.test.ts"
+    "src/fsm.ts"
   ],
   "exclude": [
     "node_modules"
