@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2015 - present Christophe Venevongsos
+Copyright (c) 2018 - present Christophe Venevongsos
 
 All rights reserved.
 
