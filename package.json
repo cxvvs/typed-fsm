@@ -1,19 +1,21 @@
 {
   "name": "typed-fsm",
   "description": "A small well-typed finite state machine library for TypeScript",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Christophe Venevongsos <christophe@venevongsos.com>",
   "license": "MIT",
-
   "main": "lib/fsm.js",
   "module": "lib/fsm.es.js",
-  "files": ["lib/fsm.js", "lib/fsm.es.js", "lib/fsm.d.ts"],
+  "files": [
+    "lib/fsm.js",
+    "lib/fsm.es.js",
+    "lib/fsm.d.ts"
+  ],
   "types": "lib/fsm.d.ts",
   "scripts": {
     "build": "rollup -c",
     "test": "rollup -c && jest"
   },
-
   "devDependencies": {
     "@types/jest": "23.3.9",
     "jest": "23.6.0",
