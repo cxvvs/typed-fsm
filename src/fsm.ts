@@ -1,6 +1,3 @@
-
-import { FSMCommon } from 'src/fsm.common'
-
 //////////////////
 /// STATES
 /////////////////
@@ -148,6 +145,10 @@ type WildcardHandler<
     currentState: (SM[CURRENTSTATE]['T']),
     message: MM[keyof MM]['_T']
   ) => SM[keyof SM]['T']
+}
+
+function noTransition(state: string, message: string) {
+  return `No transition encoded for (${state}, ${message}), message ignored`;
 }
 
 type BehaviorMap<
@@ -316,7 +317,7 @@ class FSMDescription<
               stateBehavior.handling['_']
 
             if (messageTransition === undefined) {
-              console.warn(FSMCommon.noTransition(stateKey, messageKey))
+              console.warn(noTransition(stateKey, messageKey))
               console.warn({ messageKey, state, messages })
               return
             }

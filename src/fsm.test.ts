@@ -1,5 +1,8 @@
 import { FSM, FSMState, FSMMessage } from 'src/fsm'
-import { FSMCommon } from 'src/fsm.common';
+
+function noTransition(state: string, message: string) {
+  return `No transition encoded for (${state}, ${message}), message ignored`;
+}
 
 /////////////////////////////
 // States
@@ -98,7 +101,7 @@ test('Empty state machine', () => {
   expect(instance.value()).toEqual(Idle)
 
   instance.send.play({});
-  expect(spyWarn).toHaveBeenCalledWith(FSMCommon.noTransition('idle', 'play'))
+  expect(spyWarn).toHaveBeenCalledWith(noTransition('idle', 'play'))
 })
 
 test('First state lifecycle', () => {
