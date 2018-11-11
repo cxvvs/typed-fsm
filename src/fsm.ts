@@ -88,7 +88,7 @@ export type Self<
   SM extends StateMap<any>,
   MM extends MessageMap
 > = {
-  state: () => SM[keyof SM]['T']
+  value: () => SM[keyof SM]['T']
   send: {
     [K in keyof MM]: (message: MM[K]['_T']) => void
   }
@@ -364,7 +364,7 @@ class FSMDescription<
             send[messageKey] = sendFactory(messagePrototype);
           }
 
-          self.state = stateGet
+          self.value = stateGet
           self.send = send
 
           return self;
@@ -391,7 +391,11 @@ class FSMDescription<
 
 }
 
-class FSMInstance<STATE, SM extends StateMap<STATE>, MM extends MessageMap> {
+class FSMInstance<
+  STATE,
+  SM extends StateMap<STATE>,
+  MM extends MessageMap
+> implements Self<SM, MM> {
 
   readonly value: () => STATE;
   readonly send: Self<SM, MM>['send']

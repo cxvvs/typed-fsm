@@ -530,7 +530,7 @@ test('State getter asynchronously', () => {
       idle: {
         onEnter: (self, enterState) => {
           expect(enterState).toEqual(Idle)
-          expect(self.state()).toEqual(Idle)
+          expect(self.value()).toEqual(Idle)
 
           // Transition to 'Playing' in 1 second
           setTimeout(() => {
@@ -540,7 +540,7 @@ test('State getter asynchronously', () => {
           // Check that we can still access the most recent state in 5 seconds
           setTimeout(() => {
             expect(enterState).toEqual(Idle)
-            expect(self.state()).toEqual(Playing(0))
+            expect(self.value()).toEqual(Playing(0))
           }, 5000)
 
           // Timeout not cleaned up on purpose
