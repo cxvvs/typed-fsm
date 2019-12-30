@@ -255,7 +255,7 @@ class FSMDescription<
 
     const reverseMessageMap: Record<MessageId, string> = {};
     for (let messageName in messages) {
-      const messageId: MessageId = (messages[messageName] as _InternalMessage<any>)._id
+      const messageId: MessageId = (messages[messageName] as any as _InternalMessage<any>)._id
       reverseMessageMap[messageId] = messageName
     }
 

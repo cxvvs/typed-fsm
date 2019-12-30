@@ -17,12 +17,12 @@
     "test": "rollup -c && jest"
   },
   "devDependencies": {
-    "@types/jest": "23.3.9",
-    "jest": "23.6.0",
-    "rollup": "0.67.1",
-    "rollup-plugin-typescript2": "0.17.2",
-    "ts-jest": "23.10.4",
-    "typescript": "3.1.6"
+    "@types/jest": "24.0.25",
+    "jest": "24.9.0",
+    "rollup": "1.27.14",
+    "rollup-plugin-typescript2": "0.25.3",
+    "ts-jest": "24.2.0",
+    "typescript": "3.7.4"
   },
 
   "license": "MIT",
