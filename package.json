@@ -1,7 +1,7 @@
 {
-  "name": "typed-fsm",
+  "name": "fsm-typed",
   "description": "A small well-typed finite state machine library for TypeScript",
-  "version": "0.0.2",
+  "version": "0.0.3",
 
   "main": "lib/fsm.js",
   "module": "lib/fsm.es.js",
